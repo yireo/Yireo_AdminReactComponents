@@ -1,0 +1,21 @@
+<?php
+/**
+ * AdminReactComponents extension for Magento
+ *
+ * @author      Yireo (https://www.yireo.com/)
+ * @copyright   Copyright (c) 2018 Yireo.com
+ * @license     Open Software License
+ */
+
+/** @var $block Magento\Backend\Block\Template */
+?>
+<script>
+    window.yireo_react = {
+        "customerSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/customerSearch')) ?>",
+        "productSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/productSearch')) ?>",
+        "orderSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/orderSearch')) ?>",
+        "customerLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/customerLabel')) ?>",
+        "productLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/productLabel')) ?>",
+        "orderLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/orderLabel')) ?>"
+    };
+</script>

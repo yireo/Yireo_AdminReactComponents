@@ -1,0 +1,9 @@
+{
+  "presets": [
+    "react","stage-3","latest"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    "syntax-dynamic-import"
+  ]
+}

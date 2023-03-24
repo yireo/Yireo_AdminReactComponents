@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * AdminReactComponents plugin for Magento 2
+ *
+ * @package     Yireo_AdminReactComponents
+ * @author      Yireo
+ * @copyright   Copyright 2023 Yireo (https://www.yireo.com/)
+ * @license     Open Source License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="yireo_react" frontName="yireo_react">
+            <module name="Yireo_AdminReactComponents" before="Magento_Backend" />
+        </route>
+    </router>
+</config>
