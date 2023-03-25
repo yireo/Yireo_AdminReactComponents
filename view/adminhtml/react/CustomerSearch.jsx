@@ -5,9 +5,9 @@ const CustomerSearch = (props) => {
     return (
         <AbstractSearch
             {...props}
-            panelTitle="Search for customers"
-            emptyLabel="No customer data found"
-            fields={{id: 'ID', name: 'Name', email: 'Email', group_label: 'Group', website_label: 'Website'}}
+            panelTitle={props.panelTitle || "Search for customers"}
+            emptyLabel={props.emptyLabel || "No customer data found"}
+            fields={props.fields || {id: 'ID', name: 'Name', email: 'Email', group_label: 'Group', website_label: 'Website'}}
             labelAjaxUrl={window.yireo_react.customerLabelAjaxUrl}
             searchAjaxUrl={window.yireo_react.customerSearchAjaxUrl}
         />

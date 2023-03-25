@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.4] - 25 March 2023
+### Fixed
+- Apply dataprovider to other searches as well
+- Make all props configurable
+
 ## [1.0.3] - 25 March 2023
 ### Fixed
 - Re-add data provider

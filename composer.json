@@ -1,6 +1,6 @@
 {
   "name": "yireo/module-admin-react-components",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "N/A",
   "type": "magento2-module",
   "require": {
