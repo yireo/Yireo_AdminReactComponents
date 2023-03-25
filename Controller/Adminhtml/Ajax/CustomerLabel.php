@@ -13,19 +13,20 @@ namespace Yireo\AdminReactComponents\Controller\Adminhtml\Ajax;
 
 use Magento\Backend\App\Action\Context;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Yireo\AdminReactComponents\Model\CustomerData;
 
-class CustomerLabel extends AbstractLabel
+class CustomerLabel implements HttpGetActionInterface
 {
     const ADMIN_RESOURCE = 'Yireo_AdminReactComponents::index';
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
+    private Http $request;
+    private JsonFactory $resultJsonFactory;
+    private CustomerRepositoryInterface $customerRepository;
+    private CustomerData $customerData;
 
     /**
      * @param Context $context
@@ -34,35 +35,35 @@ class CustomerLabel extends AbstractLabel
      * @param CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
-        Context $context,
         Http $request,
         JsonFactory $resultJsonFactory,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        CustomerData $customerData
     ) {
-        parent::__construct($context, $request, $resultJsonFactory);
+        $this->request = $request;
+        $this->resultJsonFactory = $resultJsonFactory;
         $this->customerRepository = $customerRepository;
+        $this->customerData = $customerData;
     }
 
     /**
-     * @return string
-     * @throws LocalizedException
+     * Index action
+     *
+     * @return Json
      */
-    protected function getLabel(): string
+    public function execute(): Json
     {
-        $id = $this->getId();
-        if (!$id > 0) {
-            throw new NoSuchEntityException(__('Empty ID'));
+        try {
+            $id = (int)$this->request->getParam('id');
+            $customer = $this->customerRepository->getById($id);
+            $data = $this->customerData->get($customer);
+        } catch (NoSuchEntityException $e) {
+            $data = [
+                'id' => 0,
+                'label' => __('No customer found'),
+            ];
         }
 
-        $customer = $this->customerRepository->getById($id);
-        return $customer->getFirstname() . ' ' . $customer->getLastname() . ' (' . $customer->getEmail() . ')';
-    }
-
-    /**
-     * @return string
-     */
-    protected function getEmptyLabel(): string
-    {
-        return 'No customer data found';
+        return $this->resultJsonFactory->create()->setData($data);
     }
 }

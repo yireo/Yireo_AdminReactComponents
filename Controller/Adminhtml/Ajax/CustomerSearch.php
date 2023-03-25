@@ -13,9 +13,6 @@ namespace Yireo\AdminReactComponents\Controller\Adminhtml\Ajax;
 
 use Magento\Backend\App\Action\Context;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Customer\Model\Customer as CustomerModel;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
@@ -23,7 +20,7 @@ use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Store\Api\WebsiteRepositoryInterface;
+use Yireo\AdminReactComponents\Model\CustomerData;
 
 class CustomerSearch extends AbstractSearch
 {
@@ -33,14 +30,9 @@ class CustomerSearch extends AbstractSearch
     private $customerRepository;
 
     /**
-     * @var GroupRepositoryInterface
+     * @var CustomerData
      */
-    private $customerGroupRepository;
-
-    /**
-     * @var WebsiteRepositoryInterface
-     */
-    private $websiteRepository;
+    private $customerData;
 
     /**
      * @param Context $context
@@ -50,8 +42,6 @@ class CustomerSearch extends AbstractSearch
      * @param JsonFactory $resultJsonFactory
      * @param SortOrderBuilderFactory $sortOrderBuilderFactory
      * @param CustomerRepositoryInterface $customerRepository
-     * @param GroupRepositoryInterface $customerGroupRepository
-     * @param WebsiteRepositoryInterface $websiteRepository
      */
     public function __construct(
         Context $context,
@@ -61,8 +51,7 @@ class CustomerSearch extends AbstractSearch
         JsonFactory $resultJsonFactory,
         SortOrderBuilderFactory $sortOrderBuilderFactory,
         CustomerRepositoryInterface $customerRepository,
-        GroupRepositoryInterface $customerGroupRepository,
-        WebsiteRepositoryInterface $websiteRepository
+        CustomerData $customerData
     ) {
         parent::__construct(
             $context,
@@ -70,12 +59,11 @@ class CustomerSearch extends AbstractSearch
             $searchCriteriaBuilderFactory,
             $filterBuilder,
             $resultJsonFactory,
-            $sortOrderBuilderFactory
+            $sortOrderBuilderFactory,
         );
 
         $this->customerRepository = $customerRepository;
-        $this->customerGroupRepository = $customerGroupRepository;
-        $this->websiteRepository = $websiteRepository;
+        $this->customerData = $customerData;
     }
 
     /**
@@ -91,31 +79,9 @@ class CustomerSearch extends AbstractSearch
         $searchResults = $this->customerRepository->getList($this->getSearchCriteria($searchFields));
 
         foreach ($searchResults->getItems() as $customer) {
-            /** @var $customer CustomerModel */
-            $customerGroup = $this->customerGroupRepository->getById($customer->getGroupId());
-            $website = $this->websiteRepository->getById($customer->getWebsiteId());
-
-            $customerData[] = [
-                'id' => $customer->getId(),
-                'name' => $this->getCustomerName($customer),
-                'email' => $customer->getEmail(),
-                'group_id' => $customerGroup->getId(),
-                'group_label' => $customerGroup->getCode(),
-                'website_id' => $website->getId(),
-                'website_label' => $website->getName(),
-            ];
+            $customerData[] = $this->customerData->get($customer);
         }
 
         return $this->resultJsonFactory->create()->setData($customerData);
-    }
-
-    /**
-     * @param CustomerInterface $customer
-     *
-     * @return string
-     */
-    private function getCustomerName(CustomerInterface $customer): string
-    {
-        return $customer->getFirstname() . ' ' . $customer->getLastname();
     }
 }
