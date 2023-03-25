@@ -134,7 +134,7 @@ abstract class AbstractSearch extends Action
                 $filters[] = $this->filterBuilder
                     ->setField($field)
                     ->setConditionType('like')
-                    ->setValue($searchWord . '%')
+                    ->setValue('%' . $searchWord . '%')
                     ->create();
             }
         }
