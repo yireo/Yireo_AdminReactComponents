@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Apply dataprovider to other searches as well
 - Make all props configurable
+- Make sure original KO viewModel is also updated via React
 
 ## [1.0.3] - 25 March 2023
 ### Fixed

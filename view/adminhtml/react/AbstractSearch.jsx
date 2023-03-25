@@ -3,7 +3,8 @@ import SearchPanel from "./AbstractSearch/SearchPanel";
 import ModalOverlay from "./AbstractSearch/ModalOverlay";
 
 const AbstractSearch = (props) => {
-    const dataProvider = props.dataProvider;
+    const koDataProvider = props.dataProvider;
+    const koViewModel = props.viewModel;
     const fieldName = props.fieldName;
     const [itemId, setItemId] = useState(props.id);
     const [itemLabel, setItemLabel] = useState(props.emptyLabel);
@@ -31,9 +32,14 @@ const AbstractSearch = (props) => {
         setLabelViaAjax(id);
         setItemId(id);
 
-        if (dataProvider) {
-            console.log('Updating dataProvider', dataProvider, fieldName);
-            requirejs('uiRegistry').get(dataProvider).data[fieldName] = id;
+        if (koDataProvider) {
+            console.log('Updating dataProvider', koDataProvider, fieldName);
+            requirejs('uiRegistry').get(koDataProvider).data[fieldName] = id;
+        }
+
+        if (koViewModel) {
+            console.log('Updating viewModel', koViewModel, fieldName);
+            requirejs('uiRegistry').get(koViewModel).value(id);
         }
     };
 
