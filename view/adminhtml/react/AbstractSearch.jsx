@@ -32,6 +32,7 @@ const AbstractSearch = (props) => {
         setItemId(id);
 
         if (dataProvider) {
+            console.log('Updating dataProvider', dataProvider, fieldName);
             requirejs('uiRegistry').get(dataProvider).data[fieldName] = id;
         }
     };
