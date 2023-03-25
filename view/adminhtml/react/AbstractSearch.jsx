@@ -3,9 +3,6 @@ import SearchPanel from "./AbstractSearch/SearchPanel";
 import ModalOverlay from "./AbstractSearch/ModalOverlay";
 
 const AbstractSearch = (props) => {
-    const dataProvider = props.dataProvider;
-    const fieldName = props.fieldName;
-
     const [itemId, setItemId] = useState(props.id);
     const [itemLabel, setItemLabel] = useState(props.emptyLabel);
     const [showSearchPanel, setShowSearchPanel] = useState(false);
@@ -31,10 +28,6 @@ const AbstractSearch = (props) => {
     const changeItemData = (id) => {
         setLabelViaAjax(id);
         setItemId(id);
-
-        if (dataProvider) {
-            requirejs('uiRegistry').get(dataProvider).data[fieldName] = id;
-        }
     };
 
     useEffect(() => {
@@ -45,7 +38,7 @@ const AbstractSearch = (props) => {
         <div>
             <div className="id-preview-container">
                 <div className="admin__control-addon id-preview">
-                    <input className="admin__control-text" type="text" name={fieldName} placeholder="Numeric ID"
+                    <input className="admin__control-text" type="text" name={props.fieldName} placeholder="Numeric ID"
                            onChange={(event) => changeItemData(event.target.value)}
                            value={itemId} maxLength="11"/>
                     <label className="admin__addon-suffix">
