@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.3] - 25 March 2023
+### Fixed
+- Re-add data provider
+- Add some debugging
+
 ## [1.0.2] - 25 March 2023
 ### Fixed
 - Reuse same model-data in both customer calls
