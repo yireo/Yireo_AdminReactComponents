@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.5] - 19 April 2023
+### Fixed
+- Rename composer package
+
 ## [1.0.4] - 25 March 2023
 ### Fixed
 - Apply dataprovider to other searches as well
