@@ -1,20 +1,21 @@
 {
-  "name": "yireo/magento2-admin-react-components",
-  "version": "1.0.5",
-  "description": "N/A",
-  "type": "magento2-module",
-  "require": {
-    "magento/framework": "^102.0|^103.0"
-  },
-  "license": [
-    "OSL-3.0"
-  ],
-  "autoload": {
-    "files": [
-      "registration.php"
+    "name": "yireo/magento2-admin-react-components",
+    "version": "1.0.5",
+    "description": "N/A",
+    "type": "magento2-module",
+    "require": {
+        "magento/framework": "^102.0|^103.0",
+        "php": ">=8.2 <8.6"
+    },
+    "license": [
+        "OSL-3.0"
     ],
-    "psr-4": {
-      "Yireo\\AdminReactComponents\\": ""
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Yireo\\AdminReactComponents\\": ""
+        }
     }
-  }
 }
