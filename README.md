@@ -7,6 +7,8 @@
 ![Latest Version](https://img.shields.io/packagist/v/yireo/magento2-admin-react-components)
 <!-- badges.specs.end -->
 
+> This module is deprecated in favor of [Loki Admin Components](https://loki-extensions.com/admin-components)
+
 
 ### Installation
 Install this package via composer:
