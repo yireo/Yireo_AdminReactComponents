@@ -1,5 +1,6 @@
 {
     "name": "yireo/magento2-admin-react-components",
+    "abandoned": true,
     "version": "1.0.5",
     "description": "N/A",
     "type": "magento2-module",
