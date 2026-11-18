@@ -1,7 +1,13 @@
 {
     "module_name": "Yireo_AdminReactComponents",
     "composer_name": "yireo/magento2-admin-react-components",
-    "sequence": [],
+    "sequence": [
+        "Magento_Backend",
+        "Magento_Catalog",
+        "Magento_Customer",
+        "Magento_Sales",
+        "Magento_Store"
+    ],
     "phpcs_severity": "7",
     "phpstan_level": "1"
 }
