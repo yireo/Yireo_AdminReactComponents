@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
+
+## [1.0.6] - 23 November 2026
+### Security
+- Require admin authentication and ACL on the CustomerLabel AJAX controller, which disclosed customer name, email, group and website to unauthenticated visitors (CWE-306)
+- Use core ACL resources per entity (Magento_Customer::manage, Magento_Sales::actions_view, Magento_Catalog::products) for all AJAX controllers
+- Allowlist sort fields, limit search input and escape LIKE wildcards in search controllers
+- Output AJAX URLs as JSON via the secure HTML renderer
+
+### Fixed
+- Fix sorting by customer group and website
+- Handle missing customer groups and websites in CustomerData
+- Encode query parameters in AJAX requests
+- Declare missing Magento module dependencies in composer.json and module.xml
+
+### Removed
+- Remove PHP 8.1 support, add PHP 8.5 support
 
 ## [1.0.5] - 19 April 2023
 ### Fixed
