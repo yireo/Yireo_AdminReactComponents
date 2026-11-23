@@ -154,7 +154,7 @@ abstract class AbstractSearch extends Action implements HttpGetActionInterface
      */
     protected function escapeLikeValue(string $value): string
     {
-        return addcslashes($value, '\\%_');
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 
     /**
