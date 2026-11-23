@@ -13,53 +13,60 @@ namespace Yireo\AdminReactComponents\Model;
 
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Customer\Model\Customer as CustomerModel;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Api\WebsiteRepositoryInterface;
 
 class CustomerData
 {
-    private GroupRepositoryInterface $customerGroupRepository;
-    private WebsiteRepositoryInterface $websiteRepository;
-
     public function __construct(
-        GroupRepositoryInterface $customerGroupRepository,
-        WebsiteRepositoryInterface $websiteRepository
+        private readonly GroupRepositoryInterface $customerGroupRepository,
+        private readonly WebsiteRepositoryInterface $websiteRepository
     ) {
-        $this->customerGroupRepository = $customerGroupRepository;
-        $this->websiteRepository = $websiteRepository;
     }
 
-    public function get(CustomerInterface $customer)
+    /**
+     * @param CustomerInterface $customer
+     * @return array
+     */
+    public function get(CustomerInterface $customer): array
     {
-
-        /** @var $customer CustomerModel */
-        $customerGroup = $this->customerGroupRepository->getById($customer->getGroupId());
-        $website = $this->websiteRepository->getById($customer->getWebsiteId());
-
         return [
             'id' => $customer->getId(),
             'label' => $this->getCustomerLabel($customer),
             'name' => $this->getCustomerName($customer),
             'email' => $customer->getEmail(),
-            'group_id' => $customerGroup->getId(),
-            'group_label' => $customerGroup->getCode(),
-            'website_id' => $website->getId(),
-            'website_label' => $website->getName(),
+            'group_id' => $customer->getGroupId(),
+            'group_label' => $this->getGroupLabel((int)$customer->getGroupId()),
+            'website_id' => $customer->getWebsiteId(),
+            'website_label' => $this->getWebsiteLabel((int)$customer->getWebsiteId()),
         ];
     }
 
-    /**
-     * @param CustomerInterface $customer
-     *
-     * @return string
-     */
+    private function getGroupLabel(int $groupId): string
+    {
+        try {
+            return (string)$this->customerGroupRepository->getById($groupId)->getCode();
+        } catch (LocalizedException $e) {
+            return '';
+        }
+    }
+
+    private function getWebsiteLabel(int $websiteId): string
+    {
+        try {
+            return (string)$this->websiteRepository->getById($websiteId)->getName();
+        } catch (LocalizedException $e) {
+            return '';
+        }
+    }
+
     private function getCustomerName(CustomerInterface $customer): string
     {
-        return implode(' ', [
+        return implode(' ', array_filter([
             $customer->getFirstname(),
             $customer->getMiddlename(),
-            $customer->getLastname()
-        ]);
+            $customer->getLastname(),
+        ]));
     }
 
     private function getCustomerLabel(CustomerInterface $customer): string
