@@ -1,9 +1,29 @@
-<?php /** * AdminReactComponents extension for Magento * * @author Yireo (https://www.yireo.com/) * @copyright Copyright (c) 2018 Yireo.com * @license Open Software License */ /** @var $block Magento\Backend\Block\Template */ ?> <script>
-    window.yireo_react = {
-        "customerSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/customerSearch')) ?>",
-        "productSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/productSearch')) ?>",
-        "orderSearchAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/orderSearch')) ?>",
-        "customerLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/customerLabel')) ?>",
-        "productLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/productLabel')) ?>",
-        "orderLabelAjaxUrl": "<?= $block->escapeUrl($block->getUrl('yireo_react/ajax/orderLabel')) ?>"
-    };</script>
+<?php
+/**
+ * AdminReactComponents extension for Magento
+ *
+ * @author Yireo (https://www.yireo.com/)
+ * @copyright Copyright (c) 2018 Yireo.com
+ * @license Open Software License
+ */
+
+declare(strict_types=1);
+
+use Magento\Backend\Block\Template;
+use Magento\Framework\View\Helper\SecureHtmlRenderer;
+
+/** @var Template $block */
+/** @var SecureHtmlRenderer $secureRenderer */
+
+$urls = [
+    'customerSearchAjaxUrl' => $block->getUrl('yireo_react/ajax/customerSearch'),
+    'productSearchAjaxUrl' => $block->getUrl('yireo_react/ajax/productSearch'),
+    'orderSearchAjaxUrl' => $block->getUrl('yireo_react/ajax/orderSearch'),
+    'customerLabelAjaxUrl' => $block->getUrl('yireo_react/ajax/customerLabel'),
+    'productLabelAjaxUrl' => $block->getUrl('yireo_react/ajax/productLabel'),
+    'orderLabelAjaxUrl' => $block->getUrl('yireo_react/ajax/orderLabel'),
+];
+
+$json = json_encode($urls, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], 'window.yireo_react = ' . $json . ';', false) ?>
