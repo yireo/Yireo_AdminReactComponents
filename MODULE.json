@@ -8,6 +8,6 @@
         "Magento_Sales",
         "Magento_Store"
     ],
-    "phpcs_severity": "7",
+    "phpcs_severity": "6",
     "phpstan_level": "1"
 }
