@@ -18,11 +18,14 @@ use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 class OrderSearch extends AbstractSearch
 {
+    public const ADMIN_RESOURCE = 'Magento_Sales::actions_view';
+
     /**
      * @var OrderRepositoryInterface
      */
@@ -68,7 +71,11 @@ class OrderSearch extends AbstractSearch
     {
         $orderData = [];
         $searchFields = ['increment_id', 'customer_email'];
-        $searchResults = $this->orderRepository->getList($this->getSearchCriteria($searchFields));
+        try {
+            $searchResults = $this->orderRepository->getList($this->getSearchCriteria($searchFields));
+        } catch (LocalizedException $e) {
+            return $this->resultJsonFactory->create()->setData([]);
+        }
 
         foreach ($searchResults->getItems() as $order) {
             /** @var $order OrderInterface */
@@ -82,5 +89,18 @@ class OrderSearch extends AbstractSearch
 
         $resultJson = $this->resultJsonFactory->create();
         return $resultJson->setData($orderData);
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getSortFieldMapping(): array
+    {
+        return [
+            'id' => 'entity_id',
+            'increment_id' => 'increment_id',
+            'customer_email' => 'customer_email',
+            'created_at' => 'created_at',
+        ];
     }
 }

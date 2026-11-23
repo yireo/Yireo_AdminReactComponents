@@ -20,9 +20,12 @@ use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
 
 class ProductSearch extends AbstractSearch
 {
+    public const ADMIN_RESOURCE = 'Magento_Catalog::products';
+
     /**
      * @var ProductRepositoryInterface
      */
@@ -68,7 +71,11 @@ class ProductSearch extends AbstractSearch
     {
         $productData = [];
         $searchFields = ['name', 'sku'];
-        $searchResults = $this->productRepository->getList($this->getSearchCriteria($searchFields));
+        try {
+            $searchResults = $this->productRepository->getList($this->getSearchCriteria($searchFields));
+        } catch (LocalizedException $e) {
+            return $this->resultJsonFactory->create()->setData([]);
+        }
 
         foreach ($searchResults->getItems() as $product) {
             /** @var $product ProductInterface */
@@ -82,5 +89,17 @@ class ProductSearch extends AbstractSearch
         return $this->resultJsonFactory->create()->setData(
             $productData
         );
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getSortFieldMapping(): array
+    {
+        return [
+            'id' => 'entity_id',
+            'name' => 'name',
+            'sku' => 'sku',
+        ];
     }
 }

@@ -24,6 +24,8 @@ use Yireo\AdminReactComponents\Model\CustomerData;
 
 class CustomerSearch extends AbstractSearch
 {
+    public const ADMIN_RESOURCE = 'Magento_Customer::manage';
+
     /**
      * @var CustomerRepositoryInterface
      */
@@ -70,18 +72,35 @@ class CustomerSearch extends AbstractSearch
      * Index action
      *
      * @return Json
-     * @throws LocalizedException
      */
     public function execute(): Json
     {
         $customerData = [];
         $searchFields = ['firstname', 'lastname', 'email'];
-        $searchResults = $this->customerRepository->getList($this->getSearchCriteria($searchFields));
+        try {
+            $searchResults = $this->customerRepository->getList($this->getSearchCriteria($searchFields));
+        } catch (LocalizedException $e) {
+            return $this->resultJsonFactory->create()->setData([]);
+        }
 
         foreach ($searchResults->getItems() as $customer) {
             $customerData[] = $this->customerData->get($customer);
         }
 
         return $this->resultJsonFactory->create()->setData($customerData);
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getSortFieldMapping(): array
+    {
+        return [
+            'id' => 'entity_id',
+            'name' => 'firstname',
+            'email' => 'email',
+            'group_label' => 'group_id',
+            'website_label' => 'website_id',
+        ];
     }
 }

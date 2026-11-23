@@ -19,12 +19,14 @@ use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\Api\SortOrderBuilderFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\Controller\Result\JsonFactory;
 
-abstract class AbstractSearch extends Action
+abstract class AbstractSearch extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'Yireo_AdminReactComponents::index';
+    private const MAX_QUERY_LENGTH = 100;
+    private const MAX_SEARCH_WORDS = 5;
 
     /**
      * @var JsonFactory
@@ -76,11 +78,19 @@ abstract class AbstractSearch extends Action
     }
 
     /**
+     * Mapping of allowed sort fields (as used in the frontend) to the actual database fields
+     *
+     * @return string[]
+     */
+    abstract protected function getSortFieldMapping(): array;
+
+    /**
      * @return string
      */
     protected function getSearchQuery(): string
     {
-        return (string)$this->request->getParam('search');
+        $searchQuery = trim((string)$this->request->getParam('search'), " \f\n\r\t\v\x00");
+        return mb_substr($searchQuery, 0, self::MAX_QUERY_LENGTH);
     }
 
     /**
@@ -88,7 +98,9 @@ abstract class AbstractSearch extends Action
      */
     protected function getSortField(): string
     {
-        return (string)$this->request->getParam('sortField');
+        $sortField = (string)$this->request->getParam('sortField');
+        $sortFieldMapping = $this->getSortFieldMapping();
+        return $sortFieldMapping[$sortField] ?? '';
     }
 
     /**
@@ -96,7 +108,8 @@ abstract class AbstractSearch extends Action
      */
     protected function getSortDirection(): string
     {
-        return (string)$this->request->getParam('sortDirection');
+        $sortDirection = strtoupper((string)$this->request->getParam('sortDirection'));
+        return $sortDirection === SortOrder::SORT_DESC ? SortOrder::SORT_DESC : SortOrder::SORT_ASC;
     }
 
     /**
@@ -110,12 +123,38 @@ abstract class AbstractSearch extends Action
         $searchCriteriaBuilder->setPageSize(10);
 
         $filters = $this->getSearchFilters($searchFields);
-        $searchCriteriaBuilder->addFilters($filters);
+        if (!empty($filters)) {
+            $searchCriteriaBuilder->addFilters($filters);
+        }
 
         $sortOrder = $this->getSortOrder();
-        $searchCriteriaBuilder->setSortOrders([$sortOrder]);
+        if ($sortOrder instanceof SortOrder) {
+            $searchCriteriaBuilder->setSortOrders([$sortOrder]);
+        }
 
         return $searchCriteriaBuilder->create();
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getSearchWords(): array
+    {
+        $searchWords = preg_split('/\s+/u', $this->getSearchQuery(), -1, PREG_SPLIT_NO_EMPTY);
+        if (!is_array($searchWords)) {
+            return [];
+        }
+
+        return array_slice(array_values(array_unique($searchWords)), 0, self::MAX_SEARCH_WORDS);
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function escapeLikeValue(string $value): string
+    {
+        return addcslashes($value, '\\%_');
     }
 
     /**
@@ -126,15 +165,12 @@ abstract class AbstractSearch extends Action
     {
         $filters = [];
 
-        $searchQuery = $this->getSearchQuery();
-        $searchWords = explode(' ', $searchQuery);
-
         foreach ($searchFields as $field) {
-            foreach ($searchWords as $searchWord) {
+            foreach ($this->getSearchWords() as $searchWord) {
                 $filters[] = $this->filterBuilder
                     ->setField($field)
                     ->setConditionType('like')
-                    ->setValue('%'.$searchWord . '%')
+                    ->setValue('%' . $this->escapeLikeValue($searchWord) . '%')
                     ->create();
             }
         }
@@ -143,29 +179,21 @@ abstract class AbstractSearch extends Action
     }
 
     /**
-     * @return SortOrder
+     * @return SortOrder|null
      */
-    private function getSortOrder(): SortOrder
+    private function getSortOrder(): ?SortOrder
     {
         $sortField = $this->getSortField();
-        if ($sortField === 'id') {
-            $sortField = 'entity_id';
-        }
-
-        if (preg_match('/(.*)_label$/', $sortField, $match)) {
-            $sortField = $match[0] . '_id';
+        if (empty($sortField)) {
+            return null;
         }
 
         /** @var SortOrderBuilder $sortOrderBuilder */
         $sortOrderBuilder = $this->sortOrderBuilderFactory->create();
+        $sortOrderBuilder
+            ->setField($sortField)
+            ->setDirection($this->getSortDirection());
 
-        if ($sortField) {
-            $sortOrderBuilder
-                ->setField($sortField)
-                ->setDirection($this->getSortDirection());
-        }
-
-        $sortOrder = $sortOrderBuilder->create();
-        return $sortOrder;
+        return $sortOrderBuilder->create();
     }
 }
