@@ -12,7 +12,7 @@ const SearchPanel = (props) => {
     const searchViaAjax = (url, search, sortField, sortDirection) => {
         setLoading(true);
         setError(false);
-        const searchUrl = url + "?search=" + search + "&sortField=" + sortField + "&sortDirection=" + sortDirection;
+        const searchUrl = url + "?search=" + encodeURIComponent(search) + "&sortField=" + encodeURIComponent(sortField) + "&sortDirection=" + encodeURIComponent(sortDirection);
         fetch(searchUrl)
             .then((response) => {
                 if (!response.ok) {

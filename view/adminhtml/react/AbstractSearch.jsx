@@ -13,7 +13,7 @@ const AbstractSearch = (props) => {
     const setLabelViaAjax = (id) => {
         if (!id > 0) return false;
 
-        const searchUrl = props.labelAjaxUrl + "?id=" + id;
+        const searchUrl = props.labelAjaxUrl + "?id=" + encodeURIComponent(id);
         fetch(searchUrl)
             .then((response) => {
                 if (!response.ok) {
