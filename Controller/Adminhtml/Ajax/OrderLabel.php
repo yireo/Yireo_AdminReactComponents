@@ -20,7 +20,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 
 class OrderLabel extends AbstractLabel
 {
-    const ADMIN_RESOURCE = 'Yireo_AdminReactComponents::index';
+    public const ADMIN_RESOURCE = 'Magento_Sales::actions_view';
 
     /**
      * @var OrderRepositoryInterface
@@ -50,7 +50,7 @@ class OrderLabel extends AbstractLabel
     protected function getLabel(): string
     {
         $id = $this->getId();
-        if (!$id > 0) {
+        if ($id <= 0) {
             throw new NoSuchEntityException(__('Empty ID'));
         }
 

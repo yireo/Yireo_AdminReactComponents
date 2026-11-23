@@ -19,7 +19,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class ProductLabel extends AbstractLabel
 {
-    const ADMIN_RESOURCE = 'Yireo_AdminReactComponents::index';
+    public const ADMIN_RESOURCE = 'Magento_Catalog::products';
 
     /**
      * @var ProductRepositoryInterface
@@ -49,7 +49,7 @@ class ProductLabel extends AbstractLabel
     protected function getLabel(): string
     {
         $id = $this->getId();
-        if (!$id > 0) {
+        if ($id <= 0) {
             throw new NoSuchEntityException(__('Empty ID'));
         }
 

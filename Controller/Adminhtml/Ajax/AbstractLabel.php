@@ -13,15 +13,14 @@ namespace Yireo\AdminReactComponents\Controller\Adminhtml\Ajax;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 
-abstract class AbstractLabel extends Action
+abstract class AbstractLabel extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'Yireo_AdminReactComponents::index';
-
     /**
      * @var Http
      */
@@ -60,13 +59,21 @@ abstract class AbstractLabel extends Action
                 'label' => $this->getLabel(),
             ];
         } catch (NoSuchEntityException $e) {
-            $data = [
-                'id' => 0,
-                'label' => __($this->getEmptyLabel()),
-            ];
+            $data = $this->getEmptyData();
         }
 
         return $this->resultJsonFactory->create()->setData($data);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getEmptyData(): array
+    {
+        return [
+            'id' => 0,
+            'label' => __($this->getEmptyLabel()),
+        ];
     }
 
     /**
