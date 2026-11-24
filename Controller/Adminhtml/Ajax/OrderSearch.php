@@ -16,11 +16,10 @@ use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\App\Request\Http;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class OrderSearch extends AbstractSearch
 {
@@ -39,6 +38,7 @@ class OrderSearch extends AbstractSearch
      * @param FilterBuilder $filterBuilder
      * @param JsonFactory $resultJsonFactory
      * @param SortOrderBuilderFactory $sortOrderBuilderFactory
+     * @param LoggerInterface $logger
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
@@ -48,6 +48,7 @@ class OrderSearch extends AbstractSearch
         FilterBuilder $filterBuilder,
         JsonFactory $resultJsonFactory,
         SortOrderBuilderFactory $sortOrderBuilderFactory,
+        LoggerInterface $logger,
         OrderRepositoryInterface $orderRepository
     ) {
         parent::__construct(
@@ -56,26 +57,21 @@ class OrderSearch extends AbstractSearch
             $searchCriteriaBuilderFactory,
             $filterBuilder,
             $resultJsonFactory,
-            $sortOrderBuilderFactory
+            $sortOrderBuilderFactory,
+            $logger
         );
 
         $this->orderRepository = $orderRepository;
     }
 
     /**
-     * Index action
-     *
-     * @return Json
+     * @return array
      */
-    public function execute(): Json
+    protected function getSearchResults(): array
     {
         $orderData = [];
         $searchFields = ['increment_id', 'customer_email'];
-        try {
-            $searchResults = $this->orderRepository->getList($this->getSearchCriteria($searchFields));
-        } catch (LocalizedException $e) {
-            return $this->resultJsonFactory->create()->setData([]);
-        }
+        $searchResults = $this->orderRepository->getList($this->getSearchCriteria($searchFields));
 
         foreach ($searchResults->getItems() as $order) {
             /** @var $order OrderInterface */
@@ -87,8 +83,7 @@ class OrderSearch extends AbstractSearch
             ];
         }
 
-        $resultJson = $this->resultJsonFactory->create();
-        return $resultJson->setData($orderData);
+        return $orderData;
     }
 
     /**

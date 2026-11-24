@@ -21,10 +21,14 @@ use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Request\Http as HttpRequest;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 abstract class AbstractSearch extends Action implements HttpGetActionInterface
 {
+    private const MIN_QUERY_LENGTH = 2;
     private const MAX_QUERY_LENGTH = 100;
     private const MAX_SEARCH_WORDS = 5;
 
@@ -53,12 +57,18 @@ abstract class AbstractSearch extends Action implements HttpGetActionInterface
     private $sortOrderBuilderFactory;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @param Context $context
      * @param HttpRequest $request
      * @param SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
      * @param FilterBuilder $filterBuilder
      * @param JsonFactory $resultJsonFactory
      * @param SortOrderBuilderFactory $sortOrderBuilderFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Context $context,
@@ -66,7 +76,8 @@ abstract class AbstractSearch extends Action implements HttpGetActionInterface
         SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory,
         FilterBuilder $filterBuilder,
         JsonFactory $resultJsonFactory,
-        SortOrderBuilderFactory $sortOrderBuilderFactory
+        SortOrderBuilderFactory $sortOrderBuilderFactory,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
 
@@ -75,7 +86,28 @@ abstract class AbstractSearch extends Action implements HttpGetActionInterface
         $this->filterBuilder = $filterBuilder;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->sortOrderBuilderFactory = $sortOrderBuilderFactory;
+        $this->logger = $logger;
     }
+
+    /**
+     * @return Json
+     */
+    public function execute(): Json
+    {
+        try {
+            $data = $this->getSearchResults();
+        } catch (Throwable $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $data = [];
+        }
+
+        return $this->resultJsonFactory->create()->setData($data);
+    }
+
+    /**
+     * @return array
+     */
+    abstract protected function getSearchResults(): array;
 
     /**
      * Mapping of allowed sort fields (as used in the frontend) to the actual database fields
@@ -90,6 +122,10 @@ abstract class AbstractSearch extends Action implements HttpGetActionInterface
     protected function getSearchQuery(): string
     {
         $searchQuery = trim((string)$this->request->getParam('search'), " \f\n\r\t\v\x00");
+        if (mb_strlen($searchQuery) < self::MIN_QUERY_LENGTH) {
+            return '';
+        }
+
         return mb_substr($searchQuery, 0, self::MAX_QUERY_LENGTH);
     }
 

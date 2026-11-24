@@ -24,6 +24,9 @@ class AbstractSearchTest extends TestCase
         return [
             ['', []],
             ['   ', []],
+            ['f', []],
+            [' f ', []],
+            ['fo', ['fo']],
             ['foo', ['foo']],
             ["  foo \t bar\nfoo ", ['foo', 'bar']],
             ['a b c d e f g', ['a', 'b', 'c', 'd', 'e']],

@@ -17,9 +17,8 @@ use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\App\Request\Http as HttpRequest;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 use Yireo\AdminReactComponents\Model\CustomerData;
 
 class CustomerSearch extends AbstractSearch
@@ -43,7 +42,9 @@ class CustomerSearch extends AbstractSearch
      * @param FilterBuilder $filterBuilder
      * @param JsonFactory $resultJsonFactory
      * @param SortOrderBuilderFactory $sortOrderBuilderFactory
+     * @param LoggerInterface $logger
      * @param CustomerRepositoryInterface $customerRepository
+     * @param CustomerData $customerData
      */
     public function __construct(
         Context $context,
@@ -52,6 +53,7 @@ class CustomerSearch extends AbstractSearch
         FilterBuilder $filterBuilder,
         JsonFactory $resultJsonFactory,
         SortOrderBuilderFactory $sortOrderBuilderFactory,
+        LoggerInterface $logger,
         CustomerRepositoryInterface $customerRepository,
         CustomerData $customerData
     ) {
@@ -62,6 +64,7 @@ class CustomerSearch extends AbstractSearch
             $filterBuilder,
             $resultJsonFactory,
             $sortOrderBuilderFactory,
+            $logger
         );
 
         $this->customerRepository = $customerRepository;
@@ -69,25 +72,19 @@ class CustomerSearch extends AbstractSearch
     }
 
     /**
-     * Index action
-     *
-     * @return Json
+     * @return array
      */
-    public function execute(): Json
+    protected function getSearchResults(): array
     {
         $customerData = [];
         $searchFields = ['firstname', 'lastname', 'email'];
-        try {
-            $searchResults = $this->customerRepository->getList($this->getSearchCriteria($searchFields));
-        } catch (LocalizedException $e) {
-            return $this->resultJsonFactory->create()->setData([]);
-        }
+        $searchResults = $this->customerRepository->getList($this->getSearchCriteria($searchFields));
 
         foreach ($searchResults->getItems() as $customer) {
             $customerData[] = $this->customerData->get($customer);
         }
 
-        return $this->resultJsonFactory->create()->setData($customerData);
+        return $customerData;
     }
 
     /**

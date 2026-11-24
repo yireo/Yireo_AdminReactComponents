@@ -60,7 +60,7 @@ class CustomerSearchTest extends AbstractBackendController
      */
     public function testWildcardsAreTreatedLiterally(): void
     {
-        $this->getRequest()->setMethod('GET')->setParams(['search' => '%']);
+        $this->getRequest()->setMethod('GET')->setParams(['search' => '%%']);
         $this->dispatch($this->uri);
 
         $this->assertSame(200, $this->getResponse()->getHttpResponseCode());

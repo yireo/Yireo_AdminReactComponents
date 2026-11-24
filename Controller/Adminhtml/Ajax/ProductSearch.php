@@ -18,9 +18,8 @@ use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Api\SortOrderBuilderFactory;
 use Magento\Framework\App\Request\Http;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class ProductSearch extends AbstractSearch
 {
@@ -39,6 +38,7 @@ class ProductSearch extends AbstractSearch
      * @param FilterBuilder $filterBuilder
      * @param JsonFactory $resultJsonFactory
      * @param SortOrderBuilderFactory $sortOrderBuilderFactory
+     * @param LoggerInterface $logger
      * @param ProductRepositoryInterface $productRepository
      */
     public function __construct(
@@ -48,6 +48,7 @@ class ProductSearch extends AbstractSearch
         FilterBuilder $filterBuilder,
         JsonFactory $resultJsonFactory,
         SortOrderBuilderFactory $sortOrderBuilderFactory,
+        LoggerInterface $logger,
         ProductRepositoryInterface $productRepository
     ) {
         parent::__construct(
@@ -56,26 +57,21 @@ class ProductSearch extends AbstractSearch
             $searchCriteriaBuilderFactory,
             $filterBuilder,
             $resultJsonFactory,
-            $sortOrderBuilderFactory
+            $sortOrderBuilderFactory,
+            $logger
         );
 
         $this->productRepository = $productRepository;
     }
 
     /**
-     * Index action
-     *
-     * @return Json
+     * @return array
      */
-    public function execute(): Json
+    protected function getSearchResults(): array
     {
         $productData = [];
         $searchFields = ['name', 'sku'];
-        try {
-            $searchResults = $this->productRepository->getList($this->getSearchCriteria($searchFields));
-        } catch (LocalizedException $e) {
-            return $this->resultJsonFactory->create()->setData([]);
-        }
+        $searchResults = $this->productRepository->getList($this->getSearchCriteria($searchFields));
 
         foreach ($searchResults->getItems() as $product) {
             /** @var $product ProductInterface */
@@ -86,9 +82,7 @@ class ProductSearch extends AbstractSearch
             ];
         }
 
-        return $this->resultJsonFactory->create()->setData(
-            $productData
-        );
+        return $productData;
     }
 
     /**
