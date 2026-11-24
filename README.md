@@ -25,6 +25,11 @@ Next, enable this module:
 bin/magento module:enable Yireo_AdminReactComponents
 ```
 
+## Security notes
+- The AJAX endpoints use the core ACL resources `Magento_Customer::manage`, `Magento_Sales::actions_view` and `Magento_Catalog::products`.
+- Adobe Commerce admin role scopes (AdminGws, restricting a role to specific websites or stores) are not enforced: an admin with the ACL resource can search and look up entities of all websites.
+- Modules using these components must cast the selected ID to an integer when saving it.
+
 ## Current status
 
 <!-- badges.test.start -->
