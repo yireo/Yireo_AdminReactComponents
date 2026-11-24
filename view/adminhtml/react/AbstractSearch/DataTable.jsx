@@ -28,7 +28,7 @@ const DataTable = (props) => {
                 classNames.push("data-row");
                 classNames.push(i % 2 ? "_even_row" : "_odd_row");
                 return (
-                    <tr key={item.id} className={classNames}>
+                    <tr key={item.id} className={classNames.join(' ')}>
                         {Object.keys(fields).map(fieldCode => (
                             <td key={fieldCode} onClick={() => props.onRowClick(item.id)}>
                                 {'' + item[fieldCode]}

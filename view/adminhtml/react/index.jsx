@@ -15,9 +15,15 @@ window.renderReactComponent = (componentId, elementId, props = {}) => {
         throw new Error('renderReactComponent requires 2 arguments');
     }
 
+    if (!Object.prototype.hasOwnProperty.call(componentMapping, componentId)) {
+        throw new Error('Unknown React component: ' + componentId);
+    }
+
+    const element = document.getElementById(elementId);
+    if (!element) {
+        throw new Error('Element not found: ' + elementId);
+    }
+
     const Component = componentMapping[componentId];
-    ReactDOM.render(
-        <Component {...props} />,
-        document.getElementById(elementId),
-    );
+    ReactDOM.render(<Component {...props} />, element);
 };

@@ -9,11 +9,11 @@ const SearchPanel = (props) => {
     const [error, setError] = useState(false);
     const [items, setItems] = useState([]);
 
-    const searchViaAjax = (url, search, sortField, sortDirection) => {
+    const searchViaAjax = (url, search, sortField, sortDirection, signal) => {
         setLoading(true);
         setError(false);
         const searchUrl = url + "?search=" + encodeURIComponent(search) + "&sortField=" + encodeURIComponent(sortField) + "&sortDirection=" + encodeURIComponent(sortDirection);
-        fetch(searchUrl)
+        fetch(searchUrl, {signal})
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
@@ -31,13 +31,25 @@ const SearchPanel = (props) => {
                 setItems([]);
             })
             .catch((error) => {
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
                 setError('' + error);
                 setItems([]);
             });
     };
 
     useEffect(() => {
-        searchViaAjax(props.ajaxUrl, search, sortField, sortDirection);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => {
+            searchViaAjax(props.ajaxUrl, search, sortField, sortDirection, controller.signal);
+        }, 300);
+
+        return () => {
+            clearTimeout(timeout);
+            controller.abort();
+        };
     }, [props.ajaxUrl, search, sortField, sortDirection]);
 
     const onRowClick = (itemId) => {

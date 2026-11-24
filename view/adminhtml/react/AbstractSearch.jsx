@@ -11,7 +11,7 @@ const AbstractSearch = (props) => {
     const [showSearchPanel, setShowSearchPanel] = useState(false);
 
     const setLabelViaAjax = (id) => {
-        if (!id > 0) return false;
+        if (!(parseInt(id, 10) > 0)) return false;
 
         const searchUrl = props.labelAjaxUrl + "?id=" + encodeURIComponent(id);
         fetch(searchUrl)
@@ -28,17 +28,16 @@ const AbstractSearch = (props) => {
         return true;
     };
 
-    const changeItemData = (id) => {
+    const changeItemData = (value) => {
+        const id = ('' + value).replace(/\D/g, '');
         setLabelViaAjax(id);
         setItemId(id);
 
         if (koDataProvider) {
-            console.log('Updating dataProvider', koDataProvider, fieldName);
             requirejs('uiRegistry').get(koDataProvider).data[fieldName] = id;
         }
 
         if (koViewModel) {
-            console.log('Updating viewModel', koViewModel, fieldName);
             requirejs('uiRegistry').get(koViewModel).value(id);
         }
     };
@@ -51,7 +50,7 @@ const AbstractSearch = (props) => {
         <div>
             <div className="id-preview-container">
                 <div className="admin__control-addon id-preview">
-                    <input className="admin__control-text" type="text" name={fieldName} placeholder="Numeric ID"
+                    <input className="admin__control-text" type="text" name={fieldName} placeholder="Numeric ID" inputMode="numeric"
                            onChange={(event) => changeItemData(event.target.value)}
                            value={itemId} maxLength="11"/>
                     <label className="admin__addon-suffix">
