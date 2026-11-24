@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 24 November 2026
+### Security
+- Limit the CustomerLabel AJAX response to id and label
+- Enforce a minimum search length and debounce search requests in the React components
+- Validate numeric ID input in the React components and check component names in renderReactComponent
+- Log unexpected errors in AJAX controllers and return empty JSON instead of an error page
+
+### Fixed
+- Render data grid row class names correctly
+
+### Changed
+- Exclude development files from the dist archive
+- Remove unneeded route ordering
+- Document ACL resources and missing AdminGws support
+
 ## [1.0.6] - 23 November 2026
 ### Security
 - Require admin authentication and ACL on the CustomerLabel AJAX controller, which disclosed customer name, email, group and website to unauthenticated visitors (CWE-306)
