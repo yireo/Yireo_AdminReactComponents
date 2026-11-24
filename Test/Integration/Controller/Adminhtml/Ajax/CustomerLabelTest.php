@@ -30,7 +30,8 @@ class CustomerLabelTest extends AbstractBackendController
         $this->assertSame(200, $this->getResponse()->getHttpResponseCode());
         $data = json_decode((string)$this->getResponse()->getBody(), true);
         $this->assertIsArray($data);
-        $this->assertSame('customer@example.com', $data['email']);
+        $this->assertSame(['id', 'label'], array_keys($data));
+        $this->assertStringContainsString('customer@example.com', $data['label']);
     }
 
     /**
@@ -59,6 +60,24 @@ class CustomerLabelTest extends AbstractBackendController
 
         $this->assertSame(403, $this->getResponse()->getHttpResponseCode());
         $this->assertStringNotContainsString('customer@example.com', (string)$this->getResponse()->getBody());
+    }
+
+    public function testReturnsEmptyDataForNonNumericId(): void
+    {
+        $this->getRequest()->setMethod('GET')->setParam('id', 'abc');
+        $this->dispatch($this->uri);
+
+        $data = json_decode((string)$this->getResponse()->getBody(), true);
+        $this->assertSame(0, $data['id']);
+    }
+
+    public function testReturnsEmptyDataForUnknownId(): void
+    {
+        $this->getRequest()->setMethod('GET')->setParam('id', 999999);
+        $this->dispatch($this->uri);
+
+        $data = json_decode((string)$this->getResponse()->getBody(), true);
+        $this->assertSame(['id' => 0, 'label' => 'No customer found'], $data);
     }
 
     public function testReturnsEmptyDataForInvalidId(): void

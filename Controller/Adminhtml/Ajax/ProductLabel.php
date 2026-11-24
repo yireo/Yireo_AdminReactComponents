@@ -16,6 +16,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Psr\Log\LoggerInterface;
 
 class ProductLabel extends AbstractLabel
 {
@@ -31,14 +32,16 @@ class ProductLabel extends AbstractLabel
      * @param ProductRepositoryInterface $productRepository
      * @param Http $request
      * @param JsonFactory $resultJsonFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Context $context,
         ProductRepositoryInterface $productRepository,
         Http $request,
-        JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory,
+        LoggerInterface $logger
     ) {
-        parent::__construct($context, $request, $resultJsonFactory);
+        parent::__construct($context, $request, $resultJsonFactory, $logger);
         $this->productRepository = $productRepository;
     }
 
@@ -48,12 +51,7 @@ class ProductLabel extends AbstractLabel
      */
     protected function getLabel(): string
     {
-        $id = $this->getId();
-        if ($id <= 0) {
-            throw new NoSuchEntityException(__('Empty ID'));
-        }
-
-        $product = $this->productRepository->getById($id);
+        $product = $this->productRepository->getById($this->getId());
 
         return $product->getName() . ' (' . $product->getSku() . ')';
     }

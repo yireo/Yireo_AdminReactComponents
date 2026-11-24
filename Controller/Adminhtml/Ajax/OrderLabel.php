@@ -17,6 +17,7 @@ use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class OrderLabel extends AbstractLabel
 {
@@ -31,15 +32,17 @@ class OrderLabel extends AbstractLabel
      * @param Context $context
      * @param Http $request
      * @param JsonFactory $resultJsonFactory
+     * @param LoggerInterface $logger
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
         Context $context,
         Http $request,
         JsonFactory $resultJsonFactory,
+        LoggerInterface $logger,
         OrderRepositoryInterface $orderRepository
     ) {
-        parent::__construct($context, $request, $resultJsonFactory);
+        parent::__construct($context, $request, $resultJsonFactory, $logger);
         $this->orderRepository = $orderRepository;
     }
 
@@ -49,13 +52,8 @@ class OrderLabel extends AbstractLabel
      */
     protected function getLabel(): string
     {
-        $id = $this->getId();
-        if ($id <= 0) {
-            throw new NoSuchEntityException(__('Empty ID'));
-        }
-
         try {
-            $order = $this->orderRepository->get($id);
+            $order = $this->orderRepository->get($this->getId());
         } catch (InvalidArgumentException $exception) {
             throw new NoSuchEntityException(__('Order not found'));
         }

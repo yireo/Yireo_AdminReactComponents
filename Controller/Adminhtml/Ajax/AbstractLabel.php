@@ -18,6 +18,8 @@ use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 abstract class AbstractLabel extends Action implements HttpGetActionInterface
 {
@@ -32,18 +34,26 @@ abstract class AbstractLabel extends Action implements HttpGetActionInterface
     protected $resultJsonFactory;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @param Context $context
      * @param Http $request
      * @param JsonFactory $resultJsonFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Context $context,
         Http $request,
-        JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->request = $request;
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -53,12 +63,19 @@ abstract class AbstractLabel extends Action implements HttpGetActionInterface
      */
     public function execute(): Json
     {
+        if ($this->getId() <= 0) {
+            return $this->resultJsonFactory->create()->setData($this->getEmptyData());
+        }
+
         try {
             $data = [
                 'id' => $this->getId(),
                 'label' => $this->getLabel(),
             ];
         } catch (NoSuchEntityException $e) {
+            $data = $this->getEmptyData();
+        } catch (Throwable $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
             $data = $this->getEmptyData();
         }
 

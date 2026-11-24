@@ -14,10 +14,10 @@ namespace Yireo\AdminReactComponents\Controller\Adminhtml\Ajax;
 use Magento\Backend\App\Action\Context;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\Request\Http;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Psr\Log\LoggerInterface;
 use Yireo\AdminReactComponents\Model\CustomerData;
 
 class CustomerLabel extends AbstractLabel
@@ -28,6 +28,7 @@ class CustomerLabel extends AbstractLabel
      * @param Context $context
      * @param Http $request
      * @param JsonFactory $resultJsonFactory
+     * @param LoggerInterface $logger
      * @param CustomerRepositoryInterface $customerRepository
      * @param CustomerData $customerData
      */
@@ -35,41 +36,25 @@ class CustomerLabel extends AbstractLabel
         Context $context,
         Http $request,
         JsonFactory $resultJsonFactory,
+        LoggerInterface $logger,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly CustomerData $customerData
     ) {
-        parent::__construct($context, $request, $resultJsonFactory);
-    }
-
-    /**
-     * Index action
-     *
-     * @return Json
-     */
-    public function execute(): Json
-    {
-        $id = $this->getId();
-        if ($id <= 0) {
-            return $this->resultJsonFactory->create()->setData($this->getEmptyData());
-        }
-
-        try {
-            $data = $this->customerData->get($this->customerRepository->getById($id));
-        } catch (LocalizedException $e) {
-            $data = $this->getEmptyData();
-        }
-
-        return $this->resultJsonFactory->create()->setData($data);
+        parent::__construct($context, $request, $resultJsonFactory, $logger);
     }
 
     /**
      * @return string
      * @throws NoSuchEntityException
-     * @throws LocalizedException
      */
     protected function getLabel(): string
     {
-        $data = $this->customerData->get($this->customerRepository->getById($this->getId()));
+        try {
+            $data = $this->customerData->get($this->customerRepository->getById($this->getId()));
+        } catch (LocalizedException $e) {
+            throw new NoSuchEntityException(__('Customer not found'));
+        }
+
         return (string)$data['label'];
     }
 
