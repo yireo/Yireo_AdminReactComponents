@@ -12,7 +12,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="admin">
         <route id="yireo_react" frontName="yireo_react">
-            <module name="Yireo_AdminReactComponents" before="Magento_Backend" />
+            <module name="Yireo_AdminReactComponents"/>
         </route>
     </router>
 </config>
