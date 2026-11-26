@@ -1,0 +1,68 @@
+schema_version: 1.6.0
+id: YIREO-ADMIN-REACT-COMPONENTS-2026-001
+aliases:
+  - GHSA-7xjf-2rjq-q5cp
+published: '2026-11-23T18:56:01Z'
+modified: '2026-11-23T18:56:01Z'
+summary: 'Unauthenticated customer name and email disclosure via adminhtml CustomerLabel AJAX controller'
+details: |-
+  ### Impact
+
+  The adminhtml controller `Yireo\AdminReactComponents\Controller\Adminhtml\Ajax\CustomerLabel` (route `<admin>/yireo_react/ajax/customerLabel?id=N`) did not extend `Magento\Backend\App\Action`. Because of this, Magento's admin authentication plugin and ACL check never ran for this controller, and the backend request validator accepted anonymous GET requests without form key or secret key.
+
+  An unauthenticated visitor who knows (or guesses) the admin front name and can reach the admin path could enumerate customer accounts by sequential ID and retrieve the customer's full name, email address, customer group (ID and code) and website (ID and name).
+
+  Additionally, logged-in admin users of any role could call this endpoint regardless of their ACL permissions.
+
+  ### Patches
+
+  Fixed in version **1.0.6**:
+
+  - `CustomerLabel` now extends the Backend action (via `AbstractLabel`), so admin authentication and ACL checks apply.
+  - All AJAX controllers of the module now use the core ACL resources per entity (`Magento_Customer::manage`, `Magento_Sales::actions_view`, `Magento_Catalog::products`) instead of a non-existing ACL resource.
+  - Search controllers additionally allowlist sort fields, limit search input and escape LIKE wildcards.
+
+  Upgrade with:
+
+  ```
+  composer require yireo/magento2-admin-react-components:^1.0.6
+  bin/magento setup:upgrade
+  ```
+
+  Note that this package is marked as abandoned. If you do not use it, uninstall it.
+
+  ### Workarounds
+
+  Disable the module (`bin/magento module:disable Yireo_AdminReactComponents`), or block requests to `/<admin>/yireo_react/ajax/customerLabel` at the web server level. Restricting access to the admin front name by IP also mitigates the issue.
+
+  ### References
+
+  - Release: https://github.com/yireo/Yireo_AdminReactComponents/releases/tag/1.0.6
+  - CWE-306: Missing Authentication for Critical Function
+severity:
+  -
+    type: CVSS_V3
+    score: 'CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N'
+affected:
+  -
+    package:
+      ecosystem: Packagist
+      name: yireo/magento2-admin-react-components
+    ranges:
+      -
+        type: ECOSYSTEM
+        events:
+          -
+            introduced: '0'
+          -
+            fixed: 1.0.6
+references:
+  -
+    type: PACKAGE
+    url: 'https://github.com/yireo/Yireo_AdminReactComponents'
+  -
+    type: ADVISORY
+    url: 'https://github.com/yireo/Yireo_AdminReactComponents/security/advisories/GHSA-7xjf-2rjq-q5cp'
+database_specific:
+  cwe_ids:
+    - CWE-306
